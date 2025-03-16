@@ -8,36 +8,32 @@
 
 
 ---- USERS TABLE ----
-CREATE TABLE user_t (
-    user_id_pk SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
+CREATE TABLE users (
+    username VARCHAR(50) PRIMARY KEY,  -- Now username is the unique ID
     total_points INT DEFAULT 0,
     games_won INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ---- GAMES TABLE ----
-CREATE TABLE games_t (
+CREATE TABLE games (
     game_id_pk UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    player1_id INT REFERENCES user_t(user_id_pk) ON DELETE CASCADE,
-    player2_id INT REFERENCES user_t(user_id_pk) ON DELETE CASCADE,
+    player1_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
+    player2_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
     board_state JSONB NOT NULL,  -- Stores the board as JSON
-    winner_id INT REFERENCES user_t(user_id_pk) DEFAULT NULL,
+    winner_username VARCHAR(50) REFERENCES users(username) DEFAULT NULL, -- Changed from winner_id
     status VARCHAR(20) CHECK (status IN ('ongoing', 'completed', 'abandoned')) DEFAULT 'ongoing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ---- MOVES TABLE ----
-CREATE TABLE moves_t (
+CREATE TABLE moves (
     move_id_pk SERIAL PRIMARY KEY,
-    game_id UUID REFERENCES game_t(game_id_pk) ON DELETE CASCADE,
-    user_id INT REFERENCES user_t(user_id_pk) ON DELETE CASCADE,
+    game_id UUID REFERENCES games(game_id_pk) ON DELETE CASCADE,
+    username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE, -- Changed from user_id
     move_from VARCHAR(5) NOT NULL,  -- e.g., "E3"
     move_to VARCHAR(5) NOT NULL,    -- e.g., "B6"
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-
-
 

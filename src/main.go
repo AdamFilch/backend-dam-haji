@@ -4,21 +4,50 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"src/main/src/handlers"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	supabase "github.com/lengzuo/supa"
 )
 
-func main() {
+var supaClient *supabase.Client
 
-	http.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
-	http.HandleFunc("/{gameid}/{user}", handlers.HandleGetGame)
-	http.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)
-	http.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
-	http.HandleFunc("/learn", handlers.LearnCheckers)
-	http.HandleFunc("/how-to-use", handlers.HowToUse)
-	http.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
+func main() {
+	var err error
+
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	conf := supabase.Config{
+		ApiKey:     os.Getenv("SUPABASE_API_KEY"),
+		ProjectRef: os.Getenv("SUPABASE_URL"),
+		Debug:      true,
+	}
+	supaClient, err = supabase.New(conf)
+	if err != nil {
+		fmt.Println("Failed in init of supa client: ", err)
+		return
+	}
+
+	r := mux.NewRouter()
+
+	fmt.Println("Vars:", r)
+	log.Println("Received user:")
+
+	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
+	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetGame)
+	r.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)
+	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame).Methods("GET")
+	r.HandleFunc("/learn", handlers.LearnCheckers)
+	r.HandleFunc("/how-to-use", handlers.HowToUse)
+	r.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
 
 	// Initialize server
 	port := ":8080"
 	fmt.Println("Server running on http://localhost" + port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(port, r))
 }
