@@ -4,37 +4,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"src/main/src/handlers"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	supabase "github.com/lengzuo/supa"
 )
 
-var supaClient *supabase.Client
-
 func main() {
-	var err error
 
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	conf := supabase.Config{
-		ApiKey:     os.Getenv("SUPABASE_API_KEY"),
-		ProjectRef: os.Getenv("SUPABASE_URL"),
-		Debug:      true,
-	}
-	supaClient, err = supabase.New(conf)
-	if err != nil {
-		fmt.Println("Failed in init of supa client: ", err)
-		return
-	}
-
 	r := mux.NewRouter()
 
+	// API Routes
 	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
 	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
 	r.HandleFunc("/learn", handlers.LearnCheckers)
