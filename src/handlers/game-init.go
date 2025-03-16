@@ -1,15 +1,13 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"src/main/src/db"
 	"src/main/src/utils"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/nedpals/supabase-go"
 )
 
 type initGamePayload struct {
@@ -25,9 +23,16 @@ type newUserStruct struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-func HandleInitGame(w http.ResponseWriter, r *http.Request) {
+type newGameStruct struct {
+	Player1Username string              `json:"player1_username"`
+	Player2Username string              `json:"player2_username"`
+	BoardState      map[string][]string `json:"board_state"`
+	Status          string              `json:"status"`
+	CreatedAt       time.Time           `json:"created_at"`
+	UpdatedAt       time.Time           `json:"updated_at"`
+}
 
-	supaClient := supabase.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_API_KEY"))
+func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	user := vars["user"]
@@ -40,12 +45,39 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var res any
-	err := supaClient.DB.From("users_t").Insert(newUser).Execute(&res)
+	err := db.SupaClient.DB.From("users_t").Insert(newUser).Execute(&res)
 	if err != nil {
 		log.Fatal("An error has been encountered trying to insert to Users_T")
 	}
 
-	fmt.Println("InitResult", res)
+	initBoardState := map[string][]string{
+		"0": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
+		"A": {" ", "X", " ", "X", " ", "X", " ", "X", " ", "X"},
+		"B": {"X", " ", "X", " ", "X", " ", "X", " ", "X", " "},
+		"C": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"D": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"E": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"F": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"G": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"H": {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+		"I": {" ", "0", " ", "0", " ", "0", " ", "0", " ", "0"},
+		"J": {"0", " ", "0", " ", "0", " ", "0", " ", "0", " "},
+		"Z": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
+	}
+
+	newGame := newGameStruct{
+		Player1Username: user,
+		Player2Username: "null",
+		BoardState:      initBoardState,
+		Status:          "ongoing",
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+	}
+
+	err = db.SupaClient.DB.From("users_t").Insert(newGame).Execute(&res)
+	if err != nil {
+		log.Fatal("An error has been encountered trying to insert to Games_t")
+	}
 
 	p := initGamePayload{
 		GameID:          "3",

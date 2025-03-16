@@ -4,13 +4,27 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"src/main/src/db"
 	"src/main/src/handlers"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/nedpals/supabase-go"
 )
 
+var supaClient *supabase.Client
+
+func init() {
+	supaClient = supabase.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_API_KEY"))
+	if supaClient == nil {
+		log.Fatal("Failed to initialize Supabase client")
+	}
+}
+
 func main() {
+
+	db.InitSupabase()
 
 	err := godotenv.Load()
 	if err != nil {
