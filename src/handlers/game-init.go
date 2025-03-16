@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
+	"src/main/src/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -25,12 +25,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		Player2GameLink: "test",
 	}
 
-	log.Println("Received user:", p)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(p)
+	utils.Serve(w, p)
 }
 
 func HandleGetGame(w http.ResponseWriter, r *http.Request) {
