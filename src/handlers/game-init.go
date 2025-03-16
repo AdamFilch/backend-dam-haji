@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -26,7 +25,6 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		Player2GameLink: "test",
 	}
 
-	fmt.Println("Vars:", vars)
 	log.Println("Received user:", p)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -36,5 +34,5 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleGetGame(w http.ResponseWriter, r *http.Request) {
-
+	log.Println("Log Handle Get Game")
 }

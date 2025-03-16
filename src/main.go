@@ -35,16 +35,13 @@ func main() {
 
 	r := mux.NewRouter()
 
-	fmt.Println("Vars:", r)
-	log.Println("Received user:")
-
 	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
-	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetGame)
-	r.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)
-	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame).Methods("GET")
+	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
 	r.HandleFunc("/learn", handlers.LearnCheckers)
 	r.HandleFunc("/how-to-use", handlers.HowToUse)
 	r.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
+	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetGame)
+	r.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)
 
 	// Initialize server
 	port := ":8080"
