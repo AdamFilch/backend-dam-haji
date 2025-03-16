@@ -74,7 +74,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:       time.Now(),
 	}
 
-	err = db.SupaClient.DB.From("users_t").Insert(newGame).Execute(&res)
+	err = db.SupaClient.DB.From("games_t").Insert(newGame).Execute(&res)
 	if err != nil {
 		log.Fatal("An error has been encountered trying to insert to Games_t")
 	}
