@@ -3,11 +3,12 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"src/main/src/db"
+	"os"
 	"src/main/src/utils"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/nedpals/supabase-go"
 )
 
 type initGamePayload struct {
@@ -25,7 +26,6 @@ type newUserStruct struct {
 
 type newGameStruct struct {
 	Player1Username string              `json:"player1_username"`
-	Player2Username string              `json:"player2_username"`
 	BoardState      map[string][]string `json:"board_state"`
 	Status          string              `json:"status"`
 	CreatedAt       time.Time           `json:"created_at"`
@@ -33,6 +33,11 @@ type newGameStruct struct {
 }
 
 func HandleInitGame(w http.ResponseWriter, r *http.Request) {
+
+	supaClient := supabase.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_API_KEY"))
+	if supaClient == nil {
+		log.Fatal("Failed to initialize Supabase client")
+	}
 
 	vars := mux.Vars(r)
 	user := vars["user"]
@@ -45,9 +50,10 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var res any
-	err := db.SupaClient.DB.From("users_t").Insert(newUser).Execute(&res)
+	var err error
+	err = supaClient.DB.From("users_t").Insert(newUser).Execute(&res)
 	if err != nil {
-		log.Fatal("An error has been encountered trying to insert to Users_T")
+		log.Fatal("An error has been encountered trying to insert to Users_T: ", err)
 	}
 
 	initBoardState := map[string][]string{
@@ -67,17 +73,24 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	newGame := newGameStruct{
 		Player1Username: user,
-		Player2Username: "null",
 		BoardState:      initBoardState,
 		Status:          "ongoing",
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
 
-	err = db.SupaClient.DB.From("games_t").Insert(newGame).Execute(&res)
+	err = supaClient.DB.From("games_t").Insert(newGame).Execute(&res)
 	if err != nil {
-		log.Fatal("An error has been encountered trying to insert to Games_t")
+		log.Fatal("An error has been encountered trying to insert to Games_t: ", err)
 	}
+
+	var insertedGames []newGameStruct
+	err = supaClient.DB.From("games_t").Select("*").Single().Execute(&insertedGames)
+	if err != nil {
+		log.Fatal("An error has been encountered trying to fetch from games_t: ", err)
+	}
+
+	log.Println("Fetched Inserted Games", insertedGames)
 
 	p := initGamePayload{
 		GameID:          "3",

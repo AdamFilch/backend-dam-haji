@@ -18,15 +18,14 @@ CREATE TABLE users (
 ---- GAMES TABLE ----
 CREATE TABLE games (
     game_id_pk UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    player1_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
-    player2_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
+    player1_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE NOT NULL,
+    player2_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE NULL,  -- Allow NULL initially
     board_state JSONB NOT NULL,  -- Stores the board as JSON
     winner_username VARCHAR(50) REFERENCES users(username) DEFAULT NULL, -- Changed from winner_id
     status VARCHAR(20) CHECK (status IN ('ongoing', 'completed', 'abandoned')) DEFAULT 'ongoing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 ---- MOVES TABLE ----
 CREATE TABLE moves (
     move_id_pk SERIAL PRIMARY KEY,
