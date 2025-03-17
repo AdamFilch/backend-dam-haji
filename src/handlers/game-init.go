@@ -51,7 +51,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	var res any
 	var err error
-	err = supaClient.DB.From("users_t").Insert(newUser).Execute(&res)
+	err = supaClient.DB.From("users").Insert(newUser).Execute(&res)
 	if err != nil {
 		log.Fatal("An error has been encountered trying to insert to Users_T: ", err)
 	}
@@ -79,13 +79,13 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:       time.Now(),
 	}
 
-	err = supaClient.DB.From("games_t").Insert(newGame).Execute(&res)
+	err = supaClient.DB.From("games").Insert(newGame).Execute(&res)
 	if err != nil {
 		log.Fatal("An error has been encountered trying to insert to Games_t: ", err)
 	}
 
 	var insertedGames []newGameStruct
-	err = supaClient.DB.From("games_t").Select("*").Single().Execute(&insertedGames)
+	err = supaClient.DB.From("games").Select("*").Single().Execute(&insertedGames)
 	if err != nil {
 		log.Fatal("An error has been encountered trying to fetch from games_t: ", err)
 	}
