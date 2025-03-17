@@ -25,6 +25,7 @@ type newUserStruct struct {
 }
 
 type newGameStruct struct {
+	GameID          string              `json:"game_id_pk"`
 	Player1Username string              `json:"player1_username"`
 	BoardState      map[string][]string `json:"board_state"`
 	Status          string              `json:"status"`
@@ -70,8 +71,10 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		"J": {"0", " ", "0", " ", "0", " ", "0", " ", "0", " "},
 		"Z": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
 	}
+	generatedGameID := utils.CreateNanoID()
 
 	newGame := newGameStruct{
+		GameID:          generatedGameID,
 		Player1Username: user,
 		BoardState:      initBoardState,
 		Status:          "ongoing",
@@ -84,16 +87,16 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("An error has been encountered trying to insert to Games_t: ", err)
 	}
 
-	var insertedGames []newGameStruct
-	err = supaClient.DB.From("games").Select("*").Single().Execute(&insertedGames)
+	var insertedGames []any
+	err = supaClient.DB.From("games").Select("*").Eq("game_id_pk", generatedGameID).Execute(&insertedGames)
 	if err != nil {
-		log.Fatal("An error has been encountered trying to fetch from games_t: ", err)
+		log.Println("An error has been encountered trying to fetching from games table: ", err)
 	}
 
 	log.Println("Fetched Inserted Games", insertedGames)
 
 	p := initGamePayload{
-		GameID:          "3",
+		GameID:          generatedGameID,
 		Username:        user,
 		Player2GameLink: "test",
 	}

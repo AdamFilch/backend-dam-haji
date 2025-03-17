@@ -17,7 +17,7 @@ CREATE TABLE users (
 
 ---- GAMES TABLE ----
 CREATE TABLE games (
-    game_id_pk UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    game_id_pk TEXT PRIMARY KEY,
     player1_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE NOT NULL,
     player2_username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE NULL,  -- Allow NULL initially
     board_state JSONB NOT NULL,  -- Stores the board as JSON
@@ -29,7 +29,7 @@ CREATE TABLE games (
 ---- MOVES TABLE ----
 CREATE TABLE moves (
     move_id_pk SERIAL PRIMARY KEY,
-    game_id UUID REFERENCES games(game_id_pk) ON DELETE CASCADE,
+    game_id TEXT REFERENCES games(game_id_pk) ON DELETE CASCADE,
     username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE, -- Changed from user_id
     move_from VARCHAR(5) NOT NULL,  -- e.g., "E3"
     move_to VARCHAR(5) NOT NULL,    -- e.g., "B6"
