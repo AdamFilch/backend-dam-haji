@@ -24,13 +24,13 @@ func init() {
 
 func main() {
 
-	db.InitSupabase()
-
+	
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
+	
+	db.InitSupabase()
 	r := mux.NewRouter()
 
 	// API Routes

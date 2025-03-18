@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/nedpals/supabase-go"
 )
 
@@ -13,11 +12,6 @@ var SupaClient *supabase.Client
 
 // Initialize Supabase client
 func InitSupabase() {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	supabaseURL := os.Getenv("SUPABASE_URL")
 	supabaseKey := os.Getenv("SUPABASE_API_KEY")
