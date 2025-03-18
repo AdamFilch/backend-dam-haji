@@ -85,11 +85,11 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 		"instructions":         "You have started a game! now send the Player 2 Game Link to the person you want to play with, be sure to tell them to substitute {your-username} with their player username!",
-		"how-to-play":          r.Host + `/how-to-play`,
-		"your-piece":           "Black",
+		"how_to_play":          r.Host + `/how-to-play`,
+		"your_piece":           "Black",
 		"turn":                 user,
 		"welcome":              `Welcome, ` + user + ` to Backend Dam Haji AKA Backend Checkers!`,
-		"make-your-first-move": r.Host + `/` + generatedGameID + `/` + user + `/move/{origin}/to/{final}`,
+		"make_your_first_move": r.Host + `/` + generatedGameID + `/` + user + `/move/{origin}/to/{final}`,
 	}
 
 	if len(existingUser) > 0 {
@@ -107,22 +107,23 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 }
 
 type selectGameStruct struct {
-	GameID          string              `json:"game_id_pk"`
-	Player1Username string              `json:"player1_username"`
-	Player2Username string              `json:"player2_username"`
-	BoardState      map[string][]string `json:"board_state"`
-	WinnerUsername  string              `json:"winner_username"`
-	Status          string              `json:"status"`
-	CreatedAt       time.Time           `json:"created_at"`
-	UpdatedAt       time.Time           `json:"updated_at"`
+	GameID               string              `json:"game_id_pk"`
+	BlackPlayer1Username string              `json:"black_player1_username"`
+	WhitePlayer2Username string              `json:"white_player2_username"`
+	BoardState           map[string][]string `json:"board_state"`
+	WinnerUsername       string              `json:"winner_username"`
+	Status               string              `json:"status"`
+	CreatedAt            time.Time           `json:"created_at"`
+	UpdatedAt            time.Time           `json:"updated_at"`
 }
 
 type startGamePayload struct {
-	GameID          string              `json:"gameId"`
-	Player1Username string              `json:"player1_username"`
-	Player2Username string              `json:"player2_username"`
-	BoardState      map[string][]string `json:"board_state"`
-	Data            map[string]string   `json:"data"`
+	GameID               string              `json:"gameId"`
+	BlackPlayer1Username string              `json:"black_player1_username"`
+	WhitePlayer2Username string              `json:"white_player2_username"`
+	BoardState           map[string][]string `json:"board_state"`
+	UpdatedAt            string              `json:"last_updated_at"`
+	Data                 map[string]string   `json:"data"`
 }
 
 func HandleGetGame(w http.ResponseWriter, r *http.Request) {
@@ -160,10 +161,10 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 		"instructions":         "Whenever a user has made a move, refresh the page to get the move they made!",
-		"how-to-play":          r.Host + `/how-to-play`,
-		"Your-piece":           "White",
+		"how_to_play":          r.Host + `/how-to-play`,
+		"Your_piece":           "White",
 		"Welcome":              `Welcome, ` + user + ` to Backend Dam Haji AKA Backend Checkers!`,
-		"make-your-first-move": r.Host + `/` + gameID + `/` + user + `/move/{origin}/to/{final}`,
+		"make_your_first_move": r.Host + `/` + gameID + `/` + user + `/move/{origin}/to/{final}`,
 	}
 
 	if len(existingUser) > 0 {
@@ -171,10 +172,11 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := startGamePayload{
-		GameID: gameID,
-		// Player1Username: fetchedGame[0].Player1Username,
-		BoardState: common.InitBoardState,
-		Data:       additionalData,
+		GameID:               gameID,
+		BlackPlayer1Username: fetchedGame[0].BlackPlayer1Username,
+		WhitePlayer2Username: user,
+		BoardState:           common.InitBoardState,
+		Data:                 additionalData,
 	}
 
 	utils.Serve(w, p)
