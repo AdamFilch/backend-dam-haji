@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"log"
+	"main/src/db"
 	"main/src/utils"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/nedpals/supabase-go"
 )
 
 type initGamePayload struct {
@@ -37,10 +36,6 @@ type newGameStruct struct {
 
 func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
-	supaClient := supabase.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_API_KEY"))
-	if supaClient == nil {
-		log.Fatal("Failed to initialize Supabase client")
-	}
 
 	vars := mux.Vars(r)
 	user := vars["user"]
@@ -54,13 +49,14 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	var res any
 	var err error
+	
 
 	var existingUser []newUserStruct
-	err = supaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
+	err = db.SupaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
 	if err != nil {
 		log.Println("Error fetching existing user from users_t: ", err)
 	} else {
-		err = supaClient.DB.From("users").Insert(newUser).Execute(&res)
+		err = db.SupaClient.DB.From("users").Insert(newUser).Execute(&res)
 		if err != nil {
 			log.Println("An error has been encountered trying to insert to Users_T: ", err)
 		}
@@ -91,13 +87,13 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:       time.Now(),
 	}
 
-	err = supaClient.DB.From("games").Insert(newGame).Execute(&res)
+	err = db.SupaClient.DB.From("games").Insert(newGame).Execute(&res)
 	if err != nil {
 		log.Println("An error has been encountered trying to insert to Games_t: ", err)
 	}
 
 	var insertedGames []any
-	err = supaClient.DB.From("games").Select("*").Eq("game_id_pk", generatedGameID).Execute(&insertedGames)
+	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", generatedGameID).Execute(&insertedGames)
 	if err != nil {
 		log.Println("An error has been encountered trying to fetching from games table: ", err)
 	}
@@ -124,5 +120,10 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleGetGame(w http.ResponseWriter, r *http.Request) {
-	log.Println("Log Handle Get Game")
+	
+
+
+
+
+	
 }

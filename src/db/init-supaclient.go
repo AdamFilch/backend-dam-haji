@@ -1,12 +1,34 @@
 package db
 
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+	"github.com/nedpals/supabase-go"
+)
+
 // Global Supabase client
-// var SupaClient *supabase.Client
+var SupaClient *supabase.Client
 
 // Initialize Supabase client
 func InitSupabase() {
-	// SupaClient = supabase.CreateClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_API_KEY"))
-	// if SupaClient == nil {
-	// 	log.Fatal("Failed to initialize Supabase client")
-	// }
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_API_KEY")
+
+	if supabaseURL == "" || supabaseKey == "" {
+		log.Fatal("SUPABASE_URL or SUPABASE_API_KEY is not set")
+	}
+
+	SupaClient = supabase.CreateClient(supabaseURL, supabaseKey)
+	if SupaClient == nil {
+		log.Fatal("Failed to initialize Supabase client")
+	}
+	
 }
