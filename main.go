@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 	"main/src/db"
 	"main/src/handlers"
+	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -36,7 +36,7 @@ func main() {
 	// API Routes
 	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
 	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
-	r.HandleFunc("/learn", handlers.LearnCheckers)
+	r.HandleFunc("/how-to-play", handlers.LearnCheckers)
 	r.HandleFunc("/how-to-use", handlers.HowToUse)
 	r.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
 	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetGame)

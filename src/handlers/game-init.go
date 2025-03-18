@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"log"
+	"main/src/utils"
 	"net/http"
 	"os"
-	"main/src/utils"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -12,9 +12,11 @@ import (
 )
 
 type initGamePayload struct {
-	GameID          string `json:"gameId"`
-	Username        string `json:"username"`
-	Player2GameLink string `json:"player2_gameLink"`
+	GameID          string              `json:"gameId"`
+	Username        string              `json:"username"`
+	Player2GameLink string              `json:"player2_gameLink"`
+	BoardState      map[string][]string `json:"board_state"`
+	Data            map[string]string   `json:"data"`
 }
 
 type newUserStruct struct {
@@ -52,9 +54,16 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	var res any
 	var err error
-	err = supaClient.DB.From("users").Insert(newUser).Execute(&res)
+
+	var existingUser []newUserStruct
+	err = supaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
 	if err != nil {
-		log.Fatal("An error has been encountered trying to insert to Users_T: ", err)
+		log.Println("Error fetching existing user from users_t: ", err)
+	} else {
+		err = supaClient.DB.From("users").Insert(newUser).Execute(&res)
+		if err != nil {
+			log.Println("An error has been encountered trying to insert to Users_T: ", err)
+		}
 	}
 
 	initBoardState := map[string][]string{
@@ -84,7 +93,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	err = supaClient.DB.From("games").Insert(newGame).Execute(&res)
 	if err != nil {
-		log.Fatal("An error has been encountered trying to insert to Games_t: ", err)
+		log.Println("An error has been encountered trying to insert to Games_t: ", err)
 	}
 
 	var insertedGames []any
@@ -93,12 +102,23 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		log.Println("An error has been encountered trying to fetching from games table: ", err)
 	}
 
-	log.Println("Fetched Inserted Games", insertedGames)
+	additionalData := map[string]string{
+		"instructions": "You have started a game! now send the Player 2 Game Link to the person you want to play with, be sure to tell them to substitute {your-username} with their player username!",
+		"how-to-play":  r.Host + `/how-to-play`,
+		"Your-piece":   "Black",
+		"Welcome":      `Welcome, ` + user + ` to Backend Dam Haji AKA Backend Checkers!`,
+	}
+
+	if len(existingUser) > 0 {
+		additionalData["Welcome"] = "Welcome Back " + user + ", lets get a W!"
+	}
 
 	p := initGamePayload{
 		GameID:          generatedGameID,
 		Username:        user,
-		Player2GameLink: "test",
+		Player2GameLink: r.Host + `/` + generatedGameID + `/{your-username}`,
+		BoardState:      initBoardState,
+		Data:            additionalData,
 	}
 	utils.Serve(w, p)
 }

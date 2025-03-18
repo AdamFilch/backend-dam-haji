@@ -24,7 +24,7 @@ CREATE TABLE games (
     winner_username VARCHAR(50) REFERENCES users(username) DEFAULT NULL, -- Changed from winner_id
     status VARCHAR(20) CHECK (status IN ('ongoing', 'completed', 'abandoned')) DEFAULT 'ongoing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 ---- MOVES TABLE ----
 CREATE TABLE moves (
