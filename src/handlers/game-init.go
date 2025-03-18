@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"src/main/src/utils"
+	"main/src/utils"
 	"time"
 
 	"github.com/gorilla/mux"

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"src/main/src/db"
-	"src/main/src/handlers"
+	"main/src/db"
+	"main/src/handlers"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
