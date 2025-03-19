@@ -54,12 +54,14 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	err = db.SupaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
 	if err != nil {
 		log.Println("Error: HandleInitGame - Fetching from users_t: ", err)
-	} else {
+	}
+	if len(existingUser) == 0 {
 		err = db.SupaClient.DB.From("users").Insert(newUser).Execute(&res)
 		if err != nil {
-			log.Println("Error: HandleInitGame - Inserting to Users_T: ", err)
+			log.Println("Error: HandleInitGame - Inserting to users_t: ", err)
 		}
 	}
+
 
 	generatedGameID := utils.CreateNanoID()
 
@@ -146,25 +148,7 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 
 	var res any
 	var err error
-
-	newUser := newUserStruct{
-		Username:    user,
-		TotalPoints: 0,
-		GamesWon:    0,
-		CreatedAt:   time.Now().UTC(),
-	}
-
-	var existingUser []newUserStruct
-	err = db.SupaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
-	if err != nil {
-		log.Println("Error: HandleInitGame - Fetching from users_t: ", err)
-	} else {
-		err = db.SupaClient.DB.From("users").Insert(newUser).Execute(&res)
-		if err != nil {
-			log.Println("Error: HandleInitGame - Inserting to Users_T: ", err)
-		}
-	}
-
+	
 	var fetchedGame []selectGameStruct
 	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameID).Execute(&fetchedGame)
 	if err != nil {
@@ -189,6 +173,27 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+
+	newUser := newUserStruct{
+		Username:    user,
+		TotalPoints: 0,
+		GamesWon:    0,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	var existingUser []newUserStruct
+	err = db.SupaClient.DB.From("users").Select("*").Eq("username", user).Execute(&existingUser)
+	if err != nil {
+		log.Println("Error: HandleInitGame - Fetching from users_t: ", err)
+	}
+	if len(existingUser) == 0 {
+		err = db.SupaClient.DB.From("users").Insert(newUser).Execute(&res)
+		if err != nil {
+			log.Println("Error: HandleInitGame - Inserting to users_t: ", err)
+		}
+	}
+
 
 	updatedGame := updateGameStruct{
 		WhitePlayer2Username: user,
