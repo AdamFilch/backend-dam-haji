@@ -108,16 +108,6 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	utils.Serve(w, p)
 }
 
-type selectGameStruct struct {
-	GameID               string              `json:"game_id_pk"`
-	BlackPlayer1Username string              `json:"black_player1_username"`
-	WhitePlayer2Username string              `json:"white_player2_username"`
-	BoardState           map[string][]string `json:"board_state"`
-	WinnerUsername       string              `json:"winner_username"`
-	Status               string              `json:"status"`
-	CreatedAt            time.Time           `json:"created_at"`
-	UpdatedAt            time.Time           `json:"updated_at"`
-}
 
 type startGamePayload struct {
 	GameID               string              `json:"gameId"`
@@ -149,10 +139,20 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	var res any
 	var err error
 	
-	var fetchedGame []selectGameStruct
+	var fetchedGame []common.TableGameStruct
 	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameID).Execute(&fetchedGame)
 	if err != nil {
 		log.Println("Error: HandleGetGame - Fetching from Games_T: ", err)
+	}
+	if len(fetchedGame) == 0 {
+		additionalData := map[string]string {
+			"error": "Oops!",
+			"message": "It seems like this game does not exists within our system!",
+			"start-game": "Please create a new game by using: " + r.Host + `/start-game/` + user,
+		}
+
+		utils.Serve(w, additionalData)
+		return
 	}
 
 	// If game has 2 players already
@@ -204,6 +204,7 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
+	
 
 	additionalData := map[string]string{
 		"instructions":         "Whenever a user has made a move, refresh the page to get the move they made!",

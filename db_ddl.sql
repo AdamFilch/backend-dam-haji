@@ -24,7 +24,9 @@ CREATE TABLE games (
     status VARCHAR(20) CHECK (status IN ('ongoing', 'completed', 'abandoned')) DEFAULT 'ongoing',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    king_locations JSONB DEFAULT '[]'::JSONB
 );
+
 ---- MOVES TABLE ----
 CREATE TABLE moves (
     move_id_pk SERIAL PRIMARY KEY,
@@ -33,6 +35,5 @@ CREATE TABLE moves (
     move_from VARCHAR(5) NOT NULL,  -- e.g., "E3"
     move_to VARCHAR(5) NOT NULL,    -- e.g., "B6"
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    piece_color VARCHAR(5) CHECK (piece_color IN ('black', 'white')) 
 );
 
