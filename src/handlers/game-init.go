@@ -126,6 +126,18 @@ type startGamePayload struct {
 	Data                 map[string]string   `json:"data"`
 }
 
+type updateGameStruct struct {
+	WhitePlayer2Username string    `json:"white_player2_username"`
+	UpdatedAt            time.Time `json:"updated_at"`
+}
+
+type alreadyMatchedPayload struct {
+	GameID               string            `json:"gameId"`
+	WhitePlayer2Username string            `json:"white_player2_username"`
+	BlackPlayer2Username string            `json:"black_player2_username"`
+	Data                 map[string]string `json:"data"`
+}
+
 func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -157,6 +169,35 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameID).Execute(&fetchedGame)
 	if err != nil {
 		log.Println("Error: HandleGetGame - Fetching from Games_T: ", err)
+	}
+
+	// If game has 2 players already
+	if fetchedGame[0].BlackPlayer1Username != "" && fetchedGame[0].WhitePlayer2Username != "" {
+		if fetchedGame[0].BlackPlayer1Username != user && fetchedGame[0].WhitePlayer2Username != user {
+			additionalData := map[string]string{
+				"start-game": "Start your own game by using: " + r.Host + `/start-game/` + user,
+				"error":      "Unfortunately this game already has 2 players playing, " + fetchedGame[0].BlackPlayer1Username + " and " + fetchedGame[0].WhitePlayer2Username,
+			}
+
+			p := alreadyMatchedPayload{
+				GameID:               gameID,
+				BlackPlayer2Username: fetchedGame[0].BlackPlayer1Username,
+				WhitePlayer2Username: fetchedGame[0].WhitePlayer2Username,
+				Data:                 additionalData,
+			}
+			utils.Serve(w, p)
+			return
+		}
+	}
+
+	updatedGame := updateGameStruct{
+		WhitePlayer2Username: user,
+		UpdatedAt:            time.Now().UTC(),
+	}
+
+	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
+	if err != nil {
+		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
 
 	additionalData := map[string]string{
