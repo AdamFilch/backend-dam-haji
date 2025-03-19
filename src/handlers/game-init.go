@@ -27,12 +27,12 @@ type newUserStruct struct {
 }
 
 type newGameStruct struct {
-	GameID          string              `json:"game_id_pk"`
-	Player1Username string              `json:"player1_username"`
-	BoardState      map[string][]string `json:"board_state"`
-	Status          string              `json:"status"`
-	CreatedAt       time.Time           `json:"created_at"`
-	UpdatedAt       time.Time           `json:"updated_at"`
+	GameID               string              `json:"game_id_pk"`
+	BlackPlayer1Username string              `json:"black_player1_username"`
+	BoardState           map[string][]string `json:"board_state"`
+	Status               string              `json:"status"`
+	CreatedAt            time.Time           `json:"created_at"`
+	UpdatedAt            time.Time           `json:"updated_at"`
 }
 
 func HandleInitGame(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		Username:    user,
 		TotalPoints: 0,
 		GamesWon:    0,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().UTC(),
 	}
 
 	var res any
@@ -64,12 +64,12 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	generatedGameID := utils.CreateNanoID()
 
 	newGame := newGameStruct{
-		GameID:          generatedGameID,
-		Player1Username: user,
-		BoardState:      common.InitBoardState,
-		Status:          "ongoing",
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
+		GameID:               generatedGameID,
+		BlackPlayer1Username: user,
+		BoardState:           common.InitBoardState,
+		Status:               "ongoing",
+		CreatedAt:            time.Now().UTC(),
+		UpdatedAt:            time.Now().UTC(),
 	}
 
 	err = db.SupaClient.DB.From("games").Insert(newGame).Execute(&res)
@@ -139,7 +139,7 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 		Username:    user,
 		TotalPoints: 0,
 		GamesWon:    0,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().UTC(),
 	}
 
 	var existingUser []newUserStruct

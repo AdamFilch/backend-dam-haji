@@ -7,7 +7,7 @@ import (
 )
 
 func CreateNanoID() string {
-	shortID, err := gonanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 6)
+	shortID, err := gonanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 6)
 	if err != nil {
 		log.Fatal(err)
 	}
