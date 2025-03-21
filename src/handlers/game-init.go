@@ -62,7 +62,6 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	generatedGameID := utils.CreateNanoID()
 
 	newGame := newGameStruct{
@@ -108,7 +107,6 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 	utils.Serve(w, p)
 }
 
-
 type startGamePayload struct {
 	GameID               string              `json:"gameId"`
 	BlackPlayer1Username string              `json:"black_player1_username"`
@@ -130,7 +128,7 @@ type alreadyMatchedPayload struct {
 	Data                 map[string]string `json:"data"`
 }
 
-func HandleGetGame(w http.ResponseWriter, r *http.Request) {
+func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	user := vars["user"]
@@ -138,22 +136,24 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 
 	var res any
 	var err error
-	
+
 	var fetchedGame []common.TableGameStruct
 	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameID).Execute(&fetchedGame)
 	if err != nil {
 		log.Println("Error: HandleGetGame - Fetching from Games_T: ", err)
 	}
 	if len(fetchedGame) == 0 {
-		additionalData := map[string]string {
-			"error": "Oops!",
-			"message": "It seems like this game does not exists within our system!",
+		additionalData := map[string]string{
+			"error":      "Oops!",
+			"message":    "It seems like this game does not exists within our system!",
 			"start-game": "Please create a new game by using: " + r.Host + `/start-game/` + user,
 		}
 
 		utils.Serve(w, additionalData)
 		return
 	}
+
+	log.Println("GetUserName", user)
 
 	// If game has 2 players already
 	if fetchedGame[0].BlackPlayer1Username != "" && fetchedGame[0].WhitePlayer2Username != "" {
@@ -174,7 +174,6 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	newUser := newUserStruct{
 		Username:    user,
 		TotalPoints: 0,
@@ -194,7 +193,6 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	updatedGame := updateGameStruct{
 		WhitePlayer2Username: user,
 		UpdatedAt:            time.Now().UTC(),
@@ -204,7 +202,6 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
-	
 
 	additionalData := map[string]string{
 		"instructions":         "Whenever a user has made a move, refresh the page to get the move they made!",
@@ -226,6 +223,66 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 		Data:                 additionalData,
 	}
 
+	utils.Serve(w, p)
+
+}
+
+func HandleGetGame(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	gameID := vars["gameid"]
+
+	var err error
+
+	var fetchedGame []common.TableGameStruct
+	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameID).Execute(&fetchedGame)
+	if err != nil {
+		log.Println("Error: HandleGetGame - Fetching from Games_T: ", err)
+	}
+	if len(fetchedGame) == 0 {
+		additionalData := map[string]string{
+			"error":      "Oops!",
+			"message":    "It seems like this game does not exists within our system!",
+			"start-game": "Please create a new game by using: " + r.Host + `/start-game/` + `username-of-your-choice`,
+		}
+
+		utils.Serve(w, additionalData)
+		return
+	}
+
+	additionalData := map[string]string{
+		"how_to_play": r.Host + `/how-to-play`,
+		"Welcome":     `Welcome, to Backend Dam Haji AKA Backend Checkers!`,
+	}
+
+	p := playerMovePayload{
+		GameID:     gameID,
+		BoardState: common.InitBoardState,
+		Data:       additionalData,
+		Players:    make(map[string]BasePlayerProp),
+	}
+
+	if fetchedGame[0].BlackPlayer1Username != "" {
+		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
+			Points: 0,
+			Letter: "Black",
+		}
+	}
+	if fetchedGame[0].WhitePlayer2Username != "" {
+		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
+			Points: 0,
+			Letter: "White",
+		}
+	}
+
+	if len(p.Players) == 2 {
+		goto end
+	}
+
+	additionalData["join-game"] = "Looks like theres an empty slot for a player, do you want to join? use either of the links below."
+	additionalData["already_have_a_move"] = r.Host + "/" + gameID + "/{username-of-your-choice}/move/{your-start-move}/to/{your-end-move}"
+	additionalData["join-only"] = r.Host + "/" + gameID + "/{username-of-your-choice}"
+
+end:
 	utils.Serve(w, p)
 
 }
