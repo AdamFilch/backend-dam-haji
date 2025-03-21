@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"main/src/common"
 	"main/src/db"
 	"main/src/utils"
 	"net/http"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -32,6 +35,12 @@ type BasePlayerProp struct {
 	Points int     `json:"points"`
 	Letter string  `json:"letter"`
 	Winner *string `json:"winner,omitempty"`
+}
+
+type updateGameWithBoardStruct struct {
+	WhitePlayer2Username string    `json:"white_player2_username"`
+	UpdatedAt            time.Time `json:"updated_at"`
+	BoardState map[string][]string `json:"board_state"`
 }
 
 func isValidPosition(position string) bool {
@@ -101,11 +110,11 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 	}
 	p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
 		Points: 0,
-		Letter: "white",
+		Letter: "White",
 	}
 
 	if !isValidPosition(end_position) {
-		additionalData["error"] = "Where are you going?! Do you even know the rules? That final position is not valid"
+		additionalData["error"] = "Excuse me, where do you think you're going? hat final position is not valid"
 		utils.Serve(w, p)
 		return
 	}
@@ -115,7 +124,29 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
+	split_start_position := strings.Split(start_position, "")
+	split_end_position := strings.Split(end_position, "")
+
+	// Convert the row part (second character) to an integer
+	start_row, _ := strconv.Atoi(split_start_position[1])
+	end_row, _ := strconv.Atoi(split_end_position[1])
+
+	log.Println("WhatIsending", end_row)
+
+	// Access the board correctly
+	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[0])][start_row-1] == "X" {
+		log.Println("Good in start")
+
+		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[0])][end_row-1] == " " {
+			// Move logic here
+			log.Println("Entered and Moved")
+
+			// Ensure proper 0-based indexing in assignment
+			p.BoardState[strings.ToUpper(split_start_position[0])][start_row-1] = " "
+			p.BoardState[strings.ToUpper(split_end_position[0])][end_row-1] = "X"
+		}
+	}
+
 	if fetchedGame[0].BlackPlayer1Username != "" && fetchedGame[0].WhitePlayer2Username != "" {
 		if fetchedGame[0].BlackPlayer1Username != user && fetchedGame[0].WhitePlayer2Username != user {
 			additionalData := map[string]string{
@@ -152,17 +183,21 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 			log.Println("Error: HandleInitGame - Inserting to users_t: ", err)
 		}
 	}
-
-	updatedGame := updateGameStruct{
+	updatedGame := updateGameWithBoardStruct{
 		WhitePlayer2Username: user,
 		UpdatedAt:            time.Now().UTC(),
+		BoardState: p.BoardState,
+		// Add the new board state move here
 	}
 
+	// Update the game in Database
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
 	if err != nil {
 		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
 
+
+	// If Eerything is okay the move will be made and
 	newMove := newMoveStruct{
 		GameID:        gameID,
 		Username:      user,
@@ -176,5 +211,6 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: HandleGameMove - Inserting to Moves_T: ", err)
 	}
 
+	fmt.Print(p)
 	utils.Serve(w, p)
 }
