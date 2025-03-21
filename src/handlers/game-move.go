@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"main/src/common"
 	"main/src/db"
@@ -38,9 +37,9 @@ type BasePlayerProp struct {
 }
 
 type updateGameWithBoardStruct struct {
-	WhitePlayer2Username string    `json:"white_player2_username"`
-	UpdatedAt            time.Time `json:"updated_at"`
-	BoardState map[string][]string `json:"board_state"`
+	WhitePlayer2Username string              `json:"white_player2_username"`
+	UpdatedAt            time.Time           `json:"updated_at"`
+	BoardState           map[string][]string `json:"board_state"`
 }
 
 func isValidPosition(position string) bool {
@@ -95,6 +94,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		additionalData["playback"] = user + " has just made the first move of the game from " + start_position + " to " + end_position
 	} else {
 		additionalData["playback"] = fetchedMoves[0].Username + " has just moved their piece from " + fetchedMoves[0].StartPosition + " to " + fetchedMoves[0].EndPosition
+		additionalData["last_updated"] = utils.FormatTimestamp(fetchedGame[0].UpdatedAt)
 	}
 
 	p := playerMovePayload{
@@ -131,15 +131,11 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 	start_row, _ := strconv.Atoi(split_start_position[1])
 	end_row, _ := strconv.Atoi(split_end_position[1])
 
-	log.Println("WhatIsending", end_row)
-
 	// Access the board correctly
 	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[0])][start_row-1] == "X" {
-		log.Println("Good in start")
 
 		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[0])][end_row-1] == " " {
 			// Move logic here
-			log.Println("Entered and Moved")
 
 			// Ensure proper 0-based indexing in assignment
 			p.BoardState[strings.ToUpper(split_start_position[0])][start_row-1] = " "
@@ -186,16 +182,17 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 	updatedGame := updateGameWithBoardStruct{
 		WhitePlayer2Username: user,
 		UpdatedAt:            time.Now().UTC(),
-		BoardState: p.BoardState,
+		BoardState:           p.BoardState,
 		// Add the new board state move here
 	}
+
+	log.Println("FormaDaga", utils.FormatTimestamp(time.Now().UTC()))
 
 	// Update the game in Database
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
 	if err != nil {
 		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
-
 
 	// If Eerything is okay the move will be made and
 	newMove := newMoveStruct{
@@ -211,6 +208,5 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: HandleGameMove - Inserting to Moves_T: ", err)
 	}
 
-	fmt.Print(p)
 	utils.Serve(w, p)
 }
