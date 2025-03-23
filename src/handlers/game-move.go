@@ -4,6 +4,7 @@ import (
 	"log"
 	"main/src/common"
 	"main/src/db"
+	logic "main/src/game-logic"
 	"main/src/utils"
 	"net/http"
 	"regexp"
@@ -78,9 +79,10 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 
-		"how_to_play": r.Host + `/how-to-play`,
-		"your_piece":  "Black",
-		"turn":        user,
+		"how_to_play":  r.Host + `/how-to-play`,
+		"your_piece":   "Black",
+		"turn":         user,
+		"last_updated": utils.FormatTimestamp(time.Now().UTC()),
 	}
 
 	var fetchedMoves []common.TableMovesStruct
@@ -124,22 +126,34 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	split_start_position := strings.Split(start_position, "")
-	split_end_position := strings.Split(end_position, "")
+	re := regexp.MustCompile(`([A-Ja-j]+)(\d+)`)
+
+	split_start_position := re.FindStringSubmatch(start_position) // Creates an array like [A8 A 8] [B9 B 9]
+	split_end_position := re.FindStringSubmatch(end_position)
 
 	// Convert the row part (second character) to an integer
-	start_row, _ := strconv.Atoi(split_start_position[1])
-	end_row, _ := strconv.Atoi(split_end_position[1])
+	start_row, _ := strconv.Atoi(split_start_position[2])
+	end_row, _ := strconv.Atoi(split_end_position[2])
 
 	// Access the board correctly
-	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[0])][start_row-1] == "X" {
+	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[1])][start_row-1] == "X" {
 
-		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[0])][end_row-1] == " " {
+		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[1])][end_row-1] == " " {
 			// Move logic here
+			adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
 
-			// Ensure proper 0-based indexing in assignment
-			p.BoardState[strings.ToUpper(split_start_position[0])][start_row-1] = " "
-			p.BoardState[strings.ToUpper(split_end_position[0])][end_row-1] = "X"
+			log.Println("Does it contain", utils.Contains(adjecent_tiles, end_position))
+
+			if utils.Contains(adjecent_tiles, end_position) != -1 {
+				// Ensure proper 0-based indexing in assignment
+				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
+				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+			} else {
+				additionalData["error"] = "Unfortunately thats not how to play checkers."
+				utils.Serve(w, p)
+				return
+			}
+
 		}
 	}
 
@@ -185,8 +199,6 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		BoardState:           p.BoardState,
 		// Add the new board state move here
 	}
-
-	log.Println("FormaDaga", utils.FormatTimestamp(time.Now().UTC()))
 
 	// Update the game in Database
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)

@@ -38,9 +38,9 @@ func main() {
 	r.HandleFunc("/how-to-play", handlers.LearnCheckers)
 	r.HandleFunc("/how-to-use", handlers.HowToUse)
 	r.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
-	r.HandleFunc("/{gameid}", handlers.HandleGetGame)
-	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetPlayer2)
 	r.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)
+	r.HandleFunc("/{gameid}/{user}", handlers.HandleGetPlayer2)
+	r.HandleFunc("/{gameid}", handlers.HandleGetGame)
 
 	// Initialize server
 	port := ":8080"
