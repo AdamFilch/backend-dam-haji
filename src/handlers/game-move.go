@@ -138,12 +138,14 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 	// Access the board correctly
 	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[1])][start_row-1] == "X" {
 
+		
 		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[1])][end_row-1] == " " {
 			// Move logic here
+			
+			moves := logic.CalculateMoveStack(end_position, strings.ToUpper(start_position), fetchedGame[0].BoardState)
+			log.Println("TheseAreTheMovesThePiecewillMake", moves)
+
 			adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
-
-			log.Println("Does it contain", utils.Contains(adjecent_tiles, end_position))
-
 			if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
 				// Ensure proper 0-based indexing in assignment
 				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
