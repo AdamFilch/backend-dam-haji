@@ -144,7 +144,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 
 			log.Println("Does it contain", utils.Contains(adjecent_tiles, end_position))
 
-			if utils.Contains(adjecent_tiles, end_position) != -1 {
+			if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
 				// Ensure proper 0-based indexing in assignment
 				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
 				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
