@@ -53,7 +53,7 @@ func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[strin
 
 	directions := [][]int{
 		{-1, -1}, {-1, 1}, // Top Left, Top Right
-		{1, -1}, {1, 1}, // Bottom Left, Bottom Right
+		{1, -1}, {1, 1},   // Bottom Left, Bottom Right
 	}
 
 	for _, dir := range directions {
@@ -62,14 +62,21 @@ func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[strin
 		newRowIndex := RowInIndex + dir[0]*2
 		newCol := col + dir[1]*2
 
+		// Ensure new move is within board boundaries
 		if newRowIndex >= 0 && newRowIndex < len(common.Character_list_Arr) &&
 			newCol >= 1 && newCol <= 10 {
 
 			midRow := common.Character_list_Arr[midRowIndex]
 			newRow := common.Character_list_Arr[newRowIndex]
 
-			// Ensure middle position has an "X" and landing position is free
-			if boardState[midRow][midCol-1] == "0" && (boardState[newRow][newCol-1] != "0" || newRow+strconv.Itoa(newCol) == startPosition) {
+			// If the landing position is occupied, block the path
+			if boardState[newRow][newCol-1] != " " {
+				return nil // Blocked path, return empty array
+			}
+
+			// Ensure middle position has an "0" and landing position is free or is the start position
+			if boardState[midRow][midCol-1] == "0" &&
+				(boardState[newRow][newCol-1] == " " || newRow+strconv.Itoa(newCol) == startPosition) {
 				res = append(res, newRow+strconv.Itoa(newCol))
 			}
 		}

@@ -148,6 +148,8 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 				moves := logic.CalculateMoveStack(strings.ToUpper(end_position), strings.ToUpper(start_position), fetchedGame[0].BoardState)
 				log.Println("CalculatedMoves", moves)
 
+				p.BoardState = logic.ComboMoveAndJump(moves, fetchedGame[0].BoardState)
+
 			} else {
 				adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
 				if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
@@ -160,8 +162,6 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-
-
 		}
 	}
 
