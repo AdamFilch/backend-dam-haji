@@ -142,8 +142,8 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[1])][end_row-1] == " " {
 			// Move logic here
 			
-			moves := logic.CalculateMoveStack(end_position, strings.ToUpper(start_position), fetchedGame[0].BoardState)
-			log.Println("TheseAreTheMovesThePiecewillMake", moves)
+			moves := logic.CalculateMoveStack(strings.ToUpper(end_position), strings.ToUpper(start_position), fetchedGame[0].BoardState)
+			log.Println("CalculatedMoves", moves)
 
 			adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
 			if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
