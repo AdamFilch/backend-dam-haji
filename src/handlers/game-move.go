@@ -141,20 +141,26 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		
 		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[1])][end_row-1] == " " {
 			// Move logic here
-			
-			moves := logic.CalculateMoveStack(strings.ToUpper(end_position), strings.ToUpper(start_position), fetchedGame[0].BoardState)
-			log.Println("CalculatedMoves", moves)
 
-			adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
-			if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
-				// Ensure proper 0-based indexing in assignment
-				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
-				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+			
+			// Check if the end position is an adjacent position; if so then dont run calculate move stack and directly move 
+			if !utils.IsAdjacent(strings.ToUpper(start_position), strings.ToUpper(end_position)) {
+				moves := logic.CalculateMoveStack(strings.ToUpper(end_position), strings.ToUpper(start_position), fetchedGame[0].BoardState)
+				log.Println("CalculatedMoves", moves)
+
 			} else {
-				additionalData["error"] = "Unfortunately thats not how to play checkers."
-				utils.Serve(w, p)
-				return
+				adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
+				if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
+					// Ensure proper 0-based indexing in assignment
+					p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
+					p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+				} else {
+					additionalData["error"] = "Unfortunately thats not how to play checkers."
+					utils.Serve(w, p)
+					return
+				}
 			}
+
 
 		}
 	}
