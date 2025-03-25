@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-
 func CalculateListOfPossibleMoves(currentPosition string, side string) (res []string) {
 	re := regexp.MustCompile(`([A-Ja-j]+)(\d+)`)
 	split_start_position := re.FindStringSubmatch(currentPosition)
@@ -54,7 +53,7 @@ func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[strin
 
 	directions := [][]int{
 		{-1, -1}, {-1, 1}, // Top Left, Top Right
-		{1, -1}, {1, 1},   // Bottom Left, Bottom Right
+		{1, -1}, {1, 1}, // Bottom Left, Bottom Right
 	}
 
 	for _, dir := range directions {
