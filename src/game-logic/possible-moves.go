@@ -56,101 +56,41 @@ func GetAllAdjecentSpaces(column int, row string) (res []string) {
 	return res
 }
 
-func GetAllJumpOverPiece(endPosition string, startPosition string, boardState map[string][]string) (res []string, found int) {
+func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[string][]string) (res []string) {
 	re := regexp.MustCompile(`([A-Ja-j]+)(\d+)`)
-	splitEndPosition := re.FindStringSubmatch(endPosition)
+	match := re.FindStringSubmatch(endPosition)
+	if len(match) < 3 {
+		return nil
+	}
 
-	column, _ := strconv.Atoi(splitEndPosition[2])
-	row := strings.ToUpper(splitEndPosition[1])
-
+	row := strings.ToUpper(match[1])
+	col, _ := strconv.Atoi(match[2])
 	RowInIndex := Character_list_Map[row]
 
-	var mid []string
+	directions := [][]int{
+		{-1, -1}, {-1, 1}, // Top Left, Top Right
+		{1, -1}, {1, 1},   // Bottom Left, Bottom Right
+	}
 
-	if RowInIndex > 1 {
-		
-		// Top Left
-		mid = re.FindStringSubmatch(Character_list_Arr[RowInIndex-1] + strconv.Itoa(column-1))
-		LTMColumn, _ := strconv.Atoi(mid[2])
+	for _, dir := range directions {
+		midRowIndex := RowInIndex + dir[0]
+		midCol := col + dir[1]
+		newRowIndex := RowInIndex + dir[0]*2
+		newCol := col + dir[1]*2
 
-		if boardState[mid[1]][LTMColumn-1] == "X" {
+		if newRowIndex >= 0 && newRowIndex < len(Character_list_Arr) &&
+			newCol >= 1 && newCol <= 10 {
 
-			ft := re.FindStringSubmatch(Character_list_Arr[RowInIndex-2] + strconv.Itoa(column-2))
-			col, _ := strconv.Atoi(ft[2])
+			midRow := Character_list_Arr[midRowIndex]
+			newRow := Character_list_Arr[newRowIndex]
 
-			if boardState[ft[1]][col-1] != "X" || ft[0] == startPosition {
-				concat := ft[0]
-				res = append(res, concat)
-				if ft[0] == startPosition {
-					found = 1
-				}
-			}
-
-		}
-
-
-		// Top Right
-		mid = re.FindStringSubmatch(Character_list_Arr[RowInIndex-1] + strconv.Itoa(column+1))
-		RTMColumn, _ := strconv.Atoi(mid[2])
-
-		if boardState[mid[1]][RTMColumn-1] == "X" { // Is Occupied
-			
-			ft := re.FindStringSubmatch(Character_list_Arr[RowInIndex-2] + strconv.Itoa(column+2))
-			col, _ := strconv.Atoi(ft[2])
-
-			if boardState[ft[1]][col-1] != "X"  || ft[0] == startPosition { // is not occupied or the position is the start position
-				concat := ft[0]
-				res = append(res, concat)
-				if ft[0] == startPosition {
-					found = 1
-				}
+			// Ensure middle position has an "X" and landing position is free
+			if boardState[midRow][midCol-1] == "0" && (boardState[newRow][newCol-1] != "0" || newRow+strconv.Itoa(newCol) == startPosition) {
+				res = append(res, newRow+strconv.Itoa(newCol))
 			}
 		}
 	}
-
-	if RowInIndex < 8 {
-
-		var mid []string
-
-
-		// Bottom Left
-		mid = re.FindStringSubmatch(Character_list_Arr[RowInIndex+1] + strconv.Itoa(column-1))
-		LBMColumn, _ := strconv.Atoi(mid[2])
-
-		if boardState[mid[1]][LBMColumn-1] == "X" {
-			
-			ft := re.FindStringSubmatch(Character_list_Arr[RowInIndex+2] + strconv.Itoa(column-2))
-			col, _ := strconv.Atoi(ft[2])
-
-			if boardState[ft[1]][col-1] != "X" || ft[0] == startPosition {
-				concat := ft[0]
-				res = append(res, concat)
-				if ft[0] == startPosition {
-					found = 1
-				}
-			}
-		}
-
-		// Bottom Right
-		mid = re.FindStringSubmatch(Character_list_Arr[RowInIndex+1] + strconv.Itoa(column+1))
-		RBMColumn, _ := strconv.Atoi(mid[2])
-
-		if boardState[mid[1]][RBMColumn-1] == "X" {
-			
-			ft := re.FindStringSubmatch(Character_list_Arr[RowInIndex+2] + strconv.Itoa(column+2))
-			col, _ := strconv.Atoi(ft[2])
-
-			if boardState[ft[1]][col-1] != "X" || ft[0] == startPosition { 
-				concat := ft[0]
-				res = append(res, concat)
-				if ft[0] == startPosition {
-					found = 1
-				}
-			}
-		}
-	}
-
-	return res, found
+	return res
 }
 
 func CalculateMoveStack(endPosition string, startPosition string, boardState map[string][]string) (stack []string) {
@@ -159,8 +99,8 @@ func CalculateMoveStack(endPosition string, startPosition string, boardState map
 	var found bool = false
 
 	for !found {
-		res, foundRes := GetAllJumpOverPiece(stack[len(stack)-1], startPosition, boardState)
-		log.Println("CalculateMoveStack", res, foundRes)
+		res := GetAllJumpOverPiece(stack[len(stack)-1], startPosition, boardState)
+		log.Println("CalculateMoveStack", res)
 
 		if true {
 			found = true
