@@ -69,7 +69,7 @@ func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[strin
 			newRow := common.Character_list_Arr[newRowIndex]
 
 			// Ensure middle position has an "X" and landing position is free
-			if boardState[midRow][midCol-1] == "0" && (boardState[newRow][newCol-1] != "0" || newRow+strconv.Itoa(newCol) == startPosition) {
+			if boardState[midRow][midCol-1] == "0" && (boardState[newRow][newCol-1] == " " || newRow+strconv.Itoa(newCol) == startPosition) {
 				res = append(res, newRow+strconv.Itoa(newCol))
 			}
 		}
