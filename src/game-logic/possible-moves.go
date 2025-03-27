@@ -62,6 +62,7 @@ func GetAllJumpOverPiece(endPosition, startPosition string, boardState map[strin
 		newRowIndex := RowInIndex + dir[0]*2
 		newCol := col + dir[1]*2
 
+		// Ensure new move is within board boundaries
 		if newRowIndex >= 0 && newRowIndex < len(common.Character_list_Arr) &&
 			newCol >= 1 && newCol <= 10 {
 
