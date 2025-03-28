@@ -148,6 +148,9 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 
 				p.BoardState = logic.ComboMoveAndJump(moves, fetchedGame[0].BoardState)
 
+				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
+				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+
 			} else {
 				adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
 				if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
