@@ -79,7 +79,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 
-		"how_to_play":  r.Host + `/how-to-play`,
+		"how_to_play":  r.Host + `/learn-checkers`,
 		"your_piece":   "Black",
 		"turn":         user,
 		"last_updated": utils.FormatTimestamp(time.Now().UTC()),

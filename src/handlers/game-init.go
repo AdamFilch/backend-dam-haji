@@ -86,7 +86,7 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 		"instructions":         "You have started a game! now send the Player 2 Game Link to the person you want to play with, be sure to tell them to substitute {your-username} with their player username!",
-		"how_to_play":          r.Host + `/how-to-play`,
+		"how_to_play":          r.Host + `/learn-checkers`,
 		"your_piece":           "Black",
 		"turn":                 user,
 		"welcome":              `Welcome, ` + user + ` to Backend Dam Haji AKA Backend Checkers!`,
@@ -205,7 +205,7 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 
 	additionalData := map[string]string{
 		"instructions":         "Whenever a user has made a move, refresh the page to get the move they made!",
-		"how_to_play":          r.Host + `/how-to-play`,
+		"how_to_play":          r.Host + `/learn-checkers`,
 		"Your_piece":           "White",
 		"Welcome":              `Welcome, ` + user + ` to Backend Dam Haji AKA Backend Checkers!`,
 		"make_your_first_move": r.Host + `/` + gameID + `/` + user + `/move/{origin}/to/{final}`,
@@ -250,7 +250,7 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	additionalData := map[string]string{
-		"how_to_play": r.Host + `/how-to-play`,
+		"how_to_play": r.Host + `/learn-checkers`,
 		"Welcome":     `Welcome, to Backend Dam Haji AKA Backend Checkers!`,
 	}
 

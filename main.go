@@ -35,7 +35,7 @@ func main() {
 	// API Routes
 	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
 	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
-	r.HandleFunc("/how-to-play", handlers.LearnCheckers)
+	r.HandleFunc("/learn-checkers", handlers.LearnCheckers)
 	r.HandleFunc("/how-to-use", handlers.HowToUse)
 	r.HandleFunc("/history/{gameid}", handlers.GetCurrentGameHistory)
 	r.HandleFunc("/{gameid}/{user}/move/{start}/to/{end}", handlers.HandleGameMove)

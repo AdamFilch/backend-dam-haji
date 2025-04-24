@@ -24,7 +24,7 @@ func HowToUse(w http.ResponseWriter, r *http.Request) {
 
 	availableEndpointsSection := map[string]string{
 		"1": "/how-to-use",
-		"2": "/how-to-play",
+		"2": "/learn-checkers",
 		"3": "/start-game/{user}",
 		"4": "/{gameid}",
 		"5": "/{gameid}/{user}",
@@ -37,7 +37,7 @@ func HowToUse(w http.ResponseWriter, r *http.Request) {
 		AvailableEndpoints: availableEndpointsSection,
 		About:              aboutSection,
 		Title:              "Welcome to Backend Checkers also known as Dam Haji (Checkers in malay)",
-		WhereToNext:        r.Host + `/how-to-play`,
+		WhereToNext:        r.Host + `/learn-checkers`,
 		CreatedBy:          []string{"Adam", "Nazmi"},
 	}
 
