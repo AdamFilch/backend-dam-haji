@@ -7,10 +7,10 @@ import (
 
 type HowToUsePayload struct {
 	Title              string            `json:"title"`
-	CreatedBy          []string          `json:"created-by"`
-	WhereToNext        string            `json:"where-to-next"`
+	CreatedBy          []string          `json:"created_by"`
+	WhereToNext        string            `json:"where_to_next"`
 	About              map[string]string `json:"about"`
-	AvailableEndpoints map[string]string `json:"available-endpoints"`
+	AvailableEndpoints map[string]string `json:"available_endpoints"`
 }
 
 func HowToUse(w http.ResponseWriter, r *http.Request) {

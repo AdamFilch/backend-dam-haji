@@ -1,5 +1,6 @@
 package common
 
+
 var InitBoardState = map[string][]string{
 	"0": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
 	"A": {" ", "X", " ", "X", " ", "X", " ", "X", " ", "X"},
@@ -13,6 +14,14 @@ var InitBoardState = map[string][]string{
 	"I": {" ", "0", " ", "0", " ", "0", " ", "0", " ", "0"},
 	"J": {"0", " ", "0", " ", "0", " ", "0", " ", "0", " "},
 	"Z": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
+}
+
+var Board_list_map = map[int]map[string][]string{
+	1: SampleBoard1,
+	2: SampleBoard2,
+	3: SampleBoard3,
+	4: SampleBoard4,
+	5: SampleBoard5,
 }
 
 var SampleBoard1 = map[string][]string{
