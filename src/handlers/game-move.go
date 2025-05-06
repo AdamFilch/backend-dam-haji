@@ -215,7 +215,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
 	}
 
-	// If Eerything is okay the move will be made and
+	// If Eerything is okay the move will be made and program proceeded
 	newMove := newMoveStruct{
 		GameID:        gameID,
 		Username:      user,

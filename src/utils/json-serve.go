@@ -14,7 +14,7 @@ func Serve(w http.ResponseWriter, p any) {
 
 type SubstituteServeResponse struct {
 	Title              string            `json:"title"`
-	CreatedBy          []string          `json:"created-by"`
+	CreatedBy          []string          `json:"created_by"`
 	About              map[string]string `json:"about"`
 }
 
