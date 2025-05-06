@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"main/src/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,4 +16,5 @@ func SetGameBoard(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(gameId, templateNum)
 
+	utils.SubstituteServe(w)
 }
