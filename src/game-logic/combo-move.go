@@ -10,7 +10,6 @@ func ComboMoveAndJump(moveList []string, boardState map[string][]string) (newBoa
 
 	newBoard = boardState
 
-
 	for len(moveList) > 1 {
 		startPos := moveList[len(moveList)-1]
 		endPos := moveList[len(moveList)-2]
