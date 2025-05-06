@@ -20,8 +20,8 @@ type SetGameStruct struct {
 }
 
 type UpdateBoardStruct struct {
-	UpdatedAt            time.Time           `json:"updated_at"`
-	BoardState           map[string][]string `json:"board_state"`
+	UpdatedAt  time.Time           `json:"updated_at"`
+	BoardState map[string][]string `json:"board_state"`
 }
 
 func SetGameBoard(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +33,16 @@ func SetGameBoard(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var res any
+
+	if temp > len(common.Board_list_map) {
+		additionalData := map[string]string{
+			"error":   "Oops!",
+			"message": "It seems like we do not have a board mapped to that number!",
+		}
+
+		utils.Serve(w, additionalData)
+		return
+	}
 
 	var fetchedGame []common.TableGameStruct
 	err = db.SupaClient.DB.From("games").Select("*").Eq("game_id_pk", gameId).Execute(&fetchedGame)
@@ -51,8 +61,8 @@ func SetGameBoard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedGame := UpdateBoardStruct{
-		UpdatedAt:            time.Now().UTC(),
-		BoardState:           common.Board_list_map[temp],
+		UpdatedAt:  time.Now().UTC(),
+		BoardState: common.Board_list_map[temp],
 	}
 
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameId).Execute(&res)
