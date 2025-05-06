@@ -16,5 +16,12 @@ func SetGameBoard(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(gameId, templateNum)
 
+<<<<<<< HEAD
+=======
+
+
+	
+
+>>>>>>> main
 	utils.SubstituteServe(w)
 }
