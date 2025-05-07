@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"main/src/common"
 	"main/src/db"
@@ -76,6 +77,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		utils.Serve(w, additionalData)
 		return
 	}
+	logic.WhatAmI(user, fetchedGame[0])
 
 	additionalData := map[string]string{
 
@@ -135,8 +137,11 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 	start_row, _ := strconv.Atoi(split_start_position[2])
 	end_row, _ := strconv.Atoi(split_end_position[2])
 
+
+	fmt.Println(*logic.OppColor, *logic.UserColor)
+
 	// Access the board correctly
-	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[1])][start_row-1] == "X" {
+	if fetchedGame[0].BoardState[strings.ToUpper(split_start_position[1])][start_row-1] == *logic.UserColor {
 
 		
 		if fetchedGame[0].BoardState[strings.ToUpper(split_end_position[1])][end_row-1] == " " {
@@ -149,14 +154,14 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 				p.BoardState = logic.ComboMoveAndJump(moves, fetchedGame[0].BoardState)
 
 				p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
-				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+				p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = *logic.UserColor
 
 			} else {
 				adjecent_tiles := logic.CalculateListOfPossibleMoves(start_position, "black")
 				if utils.Contains(adjecent_tiles, strings.ToUpper(end_position)) != -1 {
 					// Ensure proper 0-based indexing in assignment
 					p.BoardState[strings.ToUpper(split_start_position[1])][start_row-1] = " "
-					p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = "X"
+					p.BoardState[strings.ToUpper(split_end_position[1])][end_row-1] = *logic.UserColor
 				} else {
 					additionalData["error"] = "Unfortunately thats not how to play checkers."
 					utils.Serve(w, p)

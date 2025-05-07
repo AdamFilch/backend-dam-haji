@@ -33,6 +33,7 @@ func main() {
 	r := mux.NewRouter()
 
 	// API Routes
+	r.HandleFunc("/", handlers.GetLeaderboard)
 	r.HandleFunc("/leaderboard/{user}", handlers.GetLeaderboard)
 	r.HandleFunc("/start-game/{user}", handlers.HandleInitGame)
 	r.HandleFunc("/learn-checkers", handlers.LearnCheckers)
