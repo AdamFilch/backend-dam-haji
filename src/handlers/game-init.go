@@ -4,6 +4,7 @@ import (
 	"log"
 	"main/src/common"
 	"main/src/db"
+	logic "main/src/game-logic"
 	"main/src/utils"
 	"net/http"
 	"time"
@@ -117,7 +118,8 @@ type startGamePayload struct {
 }
 
 type updateGameStruct struct {
-	WhitePlayer2Username string    `json:"white_player2_username"`
+	WhitePlayer2Username *string    `json:"white_player2_username"`
+	BlackPlayer1Username *string    `json:"black_player1_username"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
@@ -152,6 +154,8 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 		utils.Serve(w, additionalData)
 		return
 	}
+
+	logic.WhatAmI(user, fetchedGame[0])
 
 
 	// If game has 2 players already
@@ -193,8 +197,15 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedGame := updateGameStruct{
-		WhitePlayer2Username: user,
 		UpdatedAt:            time.Now().UTC(),
+	}
+
+	if *logic.UserColor == "X" {
+		updatedGame.BlackPlayer1Username = &user
+		updatedGame.WhitePlayer2Username = &fetchedGame[0].WhitePlayer2Username
+	} else if *logic.UserColor == "0" {
+		updatedGame.WhitePlayer2Username = &user
+		updatedGame.BlackPlayer1Username = &fetchedGame[0].BlackPlayer1Username	
 	}
 
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
