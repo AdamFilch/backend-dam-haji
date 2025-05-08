@@ -109,17 +109,16 @@ func HandleInitGame(w http.ResponseWriter, r *http.Request) {
 }
 
 type startGamePayload struct {
-	GameID               string              `json:"gameId"`
-	BlackPlayer1Username string              `json:"black_player1_username"`
-	WhitePlayer2Username string              `json:"white_player2_username"`
-	BoardState           map[string][]string `json:"board_state"`
-	UpdatedAt            string              `json:"last_updated_at"`
-	Data                 map[string]string   `json:"data"`
+	GameID     string                    `json:"gameId"`
+	Players    map[string]BasePlayerProp `json:"players"`
+	BoardState map[string][]string       `json:"board_state"`
+	UpdatedAt  string                    `json:"last_updated_at"`
+	Data       map[string]string         `json:"data"`
 }
 
 type updateGameStruct struct {
-	WhitePlayer2Username *string    `json:"white_player2_username"`
-	BlackPlayer1Username *string    `json:"black_player1_username"`
+	WhitePlayer2Username *string   `json:"white_player2_username"`
+	BlackPlayer1Username *string   `json:"black_player1_username"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
@@ -156,7 +155,6 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logic.WhatAmI(user, fetchedGame[0])
-
 
 	// If game has 2 players already
 	if fetchedGame[0].BlackPlayer1Username != "" && fetchedGame[0].WhitePlayer2Username != "" {
@@ -197,7 +195,7 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedGame := updateGameStruct{
-		UpdatedAt:            time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 	}
 
 	if *logic.UserColor == "X" {
@@ -205,7 +203,7 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 		updatedGame.WhitePlayer2Username = &fetchedGame[0].WhitePlayer2Username
 	} else if *logic.UserColor == "0" {
 		updatedGame.WhitePlayer2Username = &user
-		updatedGame.BlackPlayer1Username = &fetchedGame[0].BlackPlayer1Username	
+		updatedGame.BlackPlayer1Username = &fetchedGame[0].BlackPlayer1Username
 	}
 
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
@@ -226,12 +224,35 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := startGamePayload{
-		GameID:               gameID,
-		BlackPlayer1Username: fetchedGame[0].BlackPlayer1Username,
-		WhitePlayer2Username: user,
-		BoardState:           common.InitBoardState,
-		Data:                 additionalData,
+		GameID:     gameID,
+		BoardState: common.InitBoardState,
+		Data:       additionalData,
 	}
+
+	// if *logic.UserColor == "X" {
+
+	// 	p.Players[user] = BasePlayerProp{
+	// 		Points: 0,
+	// 		Piece:  "X",
+	// 	}
+	// 	if fetchedGame[0].WhitePlayer2Username != "" {
+	// 		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
+	// 			Points: 0,
+	// 			Piece:  "White",
+	// 		}
+	// 	}
+	// } else if *logic.UserColor == "0" {
+	// 	if fetchedGame[0].BlackPlayer1Username != "" {
+	// 		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
+	// 			Points: 0,
+	// 			Piece:  "Black",
+	// 		}
+	// 	}
+	// 	p.Players[user] = BasePlayerProp{
+	// 		Points: 0,
+	// 		Piece:  "0",
+	// 	}
+	// }
 
 	utils.Serve(w, p)
 
@@ -274,13 +295,13 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	if fetchedGame[0].BlackPlayer1Username != "" {
 		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
 			Points: 0,
-			Piece: "Black",
+			Piece:  "Black",
 		}
 	}
 	if fetchedGame[0].WhitePlayer2Username != "" {
 		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
 			Points: 0,
-			Piece: "White",
+			Piece:  "White",
 		}
 	}
 
