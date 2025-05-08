@@ -34,12 +34,13 @@ type playerMovePayload struct {
 
 type BasePlayerProp struct {
 	Points int     `json:"points"`
-	Letter string  `json:"letter"`
+	Piece string  `json:"piece"`
 	Winner *string `json:"winner,omitempty"`
 }
 
 type updateGameWithBoardStruct struct {
-	WhitePlayer2Username string              `json:"white_player2_username"`
+	WhitePlayer2Username *string              `json:"white_player2_username"`
+	BlackPlayer1Username *string              `json:"black_player1_username"`
 	UpdatedAt            time.Time           `json:"updated_at"`
 	BoardState           map[string][]string `json:"board_state"`
 }
@@ -108,13 +109,26 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		Players:    make(map[string]BasePlayerProp), // Initialize the prop
 	}
 
-	p.Players[user] = BasePlayerProp{
-		Points: 0,
-		Letter: "Black",
-	}
-	p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
-		Points: 0,
-		Letter: "White",
+	
+	if *logic.UserColor == "X" {
+		
+		p.Players[user] = BasePlayerProp{
+			Points: 0,
+			Piece: "X",
+		}
+		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
+			Points: 0,
+			Piece: "0",
+		}
+	} else if *logic.UserColor == "0" {
+		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
+			Points: 0,
+			Piece: "X",
+		}
+		p.Players[user] = BasePlayerProp{
+			Points: 0,
+			Piece: "0",
+		}
 	}
 
 	if !isValidPosition(end_position) {
@@ -208,10 +222,17 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	updatedGame := updateGameWithBoardStruct{
-		WhitePlayer2Username: user,
 		UpdatedAt:            time.Now().UTC(),
 		BoardState:           p.BoardState,
 		// Add the new board state move here
+	}
+
+	if *logic.UserColor == "X" {
+		updatedGame.BlackPlayer1Username = &user
+		updatedGame.WhitePlayer2Username = &fetchedGame[0].WhitePlayer2Username
+	} else if *logic.UserColor == "0" {
+		updatedGame.WhitePlayer2Username = &user
+		updatedGame.BlackPlayer1Username = &fetchedGame[0].BlackPlayer1Username	
 	}
 
 	// Update the game in Database
@@ -227,7 +248,7 @@ func HandleGameMove(w http.ResponseWriter, r *http.Request) {
 		StartPosition: start_position,
 		EndPosition:   end_position,
 		CreatedAt:     time.Now().UTC(),
-		PieceColor:    "black",
+		PieceColor:    *logic.UserColor,
 	}
 	err = db.SupaClient.DB.From("moves").Insert(newMove).Execute(&res)
 	if err != nil {

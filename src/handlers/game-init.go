@@ -153,7 +153,6 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("GetUserName", user)
 
 	// If game has 2 players already
 	if fetchedGame[0].BlackPlayer1Username != "" && fetchedGame[0].WhitePlayer2Username != "" {
@@ -264,13 +263,13 @@ func HandleGetGame(w http.ResponseWriter, r *http.Request) {
 	if fetchedGame[0].BlackPlayer1Username != "" {
 		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
 			Points: 0,
-			Letter: "Black",
+			Piece: "Black",
 		}
 	}
 	if fetchedGame[0].WhitePlayer2Username != "" {
 		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
 			Points: 0,
-			Letter: "White",
+			Piece: "White",
 		}
 	}
 
