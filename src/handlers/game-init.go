@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"main/src/common"
 	"main/src/db"
@@ -208,7 +209,7 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 
 	err = db.SupaClient.DB.From("games").Update(updatedGame).Eq("game_id_pk", gameID).Execute(&res)
 	if err != nil {
-		log.Println("Error: HandleGameGetGame - Updating from games_t", err)
+		log.Println("Error: HandleGetPlayer2 - Updating from games_t", err)
 	}
 
 	additionalData := map[string]string{
@@ -227,32 +228,35 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 		GameID:     gameID,
 		BoardState: common.InitBoardState,
 		Data:       additionalData,
+		Players:    make(map[string]BasePlayerProp), // Initialize the prop
 	}
 
-	// if *logic.UserColor == "X" {
+	fmt.Println(*logic.UserColor, fetchedGame[0].BlackPlayer1Username, fetchedGame[0].WhitePlayer2Username)
 
-	// 	p.Players[user] = BasePlayerProp{
-	// 		Points: 0,
-	// 		Piece:  "X",
-	// 	}
-	// 	if fetchedGame[0].WhitePlayer2Username != "" {
-	// 		p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
-	// 			Points: 0,
-	// 			Piece:  "White",
-	// 		}
-	// 	}
-	// } else if *logic.UserColor == "0" {
-	// 	if fetchedGame[0].BlackPlayer1Username != "" {
-	// 		p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
-	// 			Points: 0,
-	// 			Piece:  "Black",
-	// 		}
-	// 	}
-	// 	p.Players[user] = BasePlayerProp{
-	// 		Points: 0,
-	// 		Piece:  "0",
-	// 	}
-	// }
+	if *logic.UserColor == "X" {
+
+		p.Players[user] = BasePlayerProp{
+			Points: 0,
+			Piece:  "X",
+		}
+		if fetchedGame[0].WhitePlayer2Username != "" {
+			p.Players[fetchedGame[0].WhitePlayer2Username] = BasePlayerProp{
+				Points: 0,
+				Piece:  "0",
+			}
+		}
+	} else if *logic.UserColor == "0" {
+		if fetchedGame[0].BlackPlayer1Username != "" {
+			p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
+				Points: 0,
+				Piece:  "X",
+			}
+		}
+		p.Players[user] = BasePlayerProp{
+			Points: 0,
+			Piece:  "0",
+		}
+	}
 
 	utils.Serve(w, p)
 
