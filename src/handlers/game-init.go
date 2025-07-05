@@ -199,10 +199,11 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	if *logic.UserColor == "X" {
+	switch *logic.UserColor {
+	case "X":
 		updatedGame.BlackPlayer1Username = &user
 		updatedGame.WhitePlayer2Username = &fetchedGame[0].WhitePlayer2Username
-	} else if *logic.UserColor == "0" {
+	case "0":
 		updatedGame.WhitePlayer2Username = &user
 		updatedGame.BlackPlayer1Username = &fetchedGame[0].BlackPlayer1Username
 	}
@@ -233,7 +234,8 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(*logic.UserColor, fetchedGame[0].BlackPlayer1Username, fetchedGame[0].WhitePlayer2Username)
 
-	if *logic.UserColor == "X" {
+	switch *logic.UserColor {
+	case "X":
 
 		p.Players[user] = BasePlayerProp{
 			Points: 0,
@@ -245,7 +247,7 @@ func HandleGetPlayer2(w http.ResponseWriter, r *http.Request) {
 				Piece:  "0",
 			}
 		}
-	} else if *logic.UserColor == "0" {
+	case "0":
 		if fetchedGame[0].BlackPlayer1Username != "" {
 			p.Players[fetchedGame[0].BlackPlayer1Username] = BasePlayerProp{
 				Points: 0,
